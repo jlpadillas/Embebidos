@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "ev3c.h": "c",
+        "ev3c_button.h": "c",
+        "ev3c_motor.h": "c",
+        "ev3c_sensor.h": "c",
+        "ev3c_lcd.h": "c",
+        "ev3c_led.h": "c",
+        "stdio.h": "c",
+        "stdlib.h": "c",
+        "math.h": "c",
+        "ev3c_core.h": "c",
+        "pthread.h": "c",
+        "exception": "c",
+        "limits": "c",
+        "types.h": "c",
+        "stat.h": "c",
+        "fcntl.h": "c",
+        "string.h": "c",
+        "fb.h": "c",
+        "mman.h": "c",
+        "time.h": "c",
+        "stdint.h": "c",
+        "cstdint": "c",
+        "ioctl.h": "c",
+        "features.h": "c",
+        "ev3c_battery.h": "c"
+    }
+}

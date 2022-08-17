@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile test.c",
+            "type": "shell",
+            "command": "/home/manager/arm-2014.05/bin/arm-none-linux-gnueabi-gcc",
+            "args": [
+                "-g",
+                "-o",
+                "${workspaceFolder}/Q/test.out",
+                "${workspaceFolder}/Q/test.c",
+                "-lm"
+            ]
+        }
+    ]
+}
