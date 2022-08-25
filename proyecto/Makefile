@@ -21,7 +21,7 @@ PRACT_FOLDER := $(notdir $(patsubst %/,%,$(PWD)))
 
 # --------------------------------------------------------------------------- #
 
-all: clean build send
+all: build send
 
 clean:
 	rm -f bin/*
@@ -35,7 +35,7 @@ send:
 #	@@echo ${PWD}
 #	@@echo ${PRACT_FOLDER}
 # Creating the folder
-	ssh -i ~/.ssh/ robot@${IP} "mkdir -p /home/robot/${PRACT_FOLDER}"
+#ssh -i ~/.ssh/ robot@${IP} "mkdir -p /home/robot/${PRACT_FOLDER}"
 	scp ${BIN_DIR}/a.out robot@${IP}:/home/robot/${PRACT_FOLDER}
 
 send_reset:

@@ -24,6 +24,11 @@
         "cstdint": "c",
         "ioctl.h": "c",
         "features.h": "c",
-        "ev3c_battery.h": "c"
+        "ev3c_battery.h": "c",
+        "proyecto.h": "c",
+        "error_checks.h": "c",
+        "timespec_operations.h": "c",
+        "type_traits": "c",
+        "cstdio": "c"
     }
 }
