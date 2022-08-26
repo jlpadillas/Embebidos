@@ -156,12 +156,19 @@ int calibrate_arm(robot_state *data) {
   data->is_hand_open = 1;              // 0 = False && 1 = True
   pthread_mutex_unlock(&data->mutex);  // Release the mutex
 
-  // Define the positions as zero
-  ev3_set_position(up_down_motor, 0);
-  ev3_set_position(grab_drop_motor, 0);
-  ev3_set_position(left_right_motor, 0);
+  // Print position of grab_drop motor
+  printf("Position of grab_drop motor: %d\n",
+         ev3_get_position(grab_drop_motor));
 
-  // Open and close the claw
+  // Define the positions as zero
+  // ev3_set_position(up_down_motor, 0);
+  ev3_set_position(grab_drop_motor, 0);
+  // ev3_set_position(left_right_motor, 0);
+
+  printf("Position of grab_drop motor: %d\n",
+         ev3_get_position(grab_drop_motor));
+
+  // close and open the claw
   grab_drop(data);
   sleep(1);
   grab_drop(data);
@@ -181,7 +188,7 @@ void reporter_function(void *arg) {
     pthread_mutex_unlock(&data->mutex);  // Release the mutex
 
     if (state == 'M') {
-      blink_lights(GREEN, 5);
+      blink_lights(GREEN, 10);
 
     } else if (state == 'C') {
       ev3_clear_lcd();  // Clear screen
@@ -223,6 +230,7 @@ void reporter_function(void *arg) {
     } else {
       // Don't do nothing in this state, wait for next iteration
     }
+    printf("Pushed button value: %d\n", data->push_sensor_value);
     usleep(SLEEP_DURATION_REPORTER);
   }
 }
@@ -330,22 +338,21 @@ void sensors_function(void *arg) {
   int filtered_value, first_time = 1;  // 0 = false, 1 = true
 
   while (1) {
-    // Check push sensor
-    ev3_update_sensor_val(push_sensor);
-    int push_sensor_value = push_sensor->val_data[0].s32;
-
     // Check color sensor
     ev3_update_sensor_val(color_sensor);
     new_data = color_sensor->val_data[0].s32;
 
     // Calculate filtered value
-    if (first_time) {
+    if (first_time == 1) {
       old_data = new_data;
       first_time = 0;
     } else {
       old_data = old_data + (ALPHA * (new_data - old_data));
     }
     filtered_value = (int)old_data;
+
+    // Check push sensor
+    ev3_update_sensor_val(push_sensor);
 
     // Check if thread has to stop
     pthread_mutex_lock(&data->mutex);  // Get the mutex
@@ -354,9 +361,10 @@ void sensors_function(void *arg) {
       break;
     } else {
       // Mutex still locked, update values
-      data->push_sensor_value = push_sensor_value;  // Update the value
-      data->color_sensor_value = filtered_value;    // Update the value
-      pthread_mutex_unlock(&data->mutex);           // Release the mutex
+      data->push_sensor_value =
+          push_sensor->val_data[0].s32;           // Update the value
+      data->color_sensor_value = filtered_value;  // Update the value
+      pthread_mutex_unlock(&data->mutex);         // Release the mutex
     }
 
     usleep(SLEEP_DURATION_SENSORS);  // Sleep for a while
@@ -383,9 +391,9 @@ void motors_function(void *arg) {
     button_pressed = data->buttons_pressed;
     push_sensor_value = data->push_sensor_value;
     color_sensor_value = data->color_sensor_value;
-    position_up_down = data->position_up_down;
-    position_left_right = data->position_left_right;
-    position_grab_drop = data->position_grab_drop;
+    // position_up_down = data->position_up_down;
+    // position_left_right = data->position_left_right;
+    // position_grab_drop = data->position_grab_drop;
 
     pthread_mutex_unlock(&data->mutex);  // ! Unlock the mutex
 
@@ -396,14 +404,14 @@ void motors_function(void *arg) {
         update_status(data, 'M');
         move_left(MANUAL_STEP);
 
-        pthread_mutex_lock(&data->mutex);
-        data->position_left_right += MANUAL_STEP;
-        pthread_mutex_unlock(&data->mutex);
+        // pthread_mutex_lock(&data->mutex);
+        // data->position_left_right += MANUAL_STEP;
+        // pthread_mutex_unlock(&data->mutex);
 
         update_status(data, 'W');
       } else {
         update_status(data, 'E');
-        sleep(SLEEP_DURATION_ERROR);
+        usleep(SLEEP_DURATION_ERROR);
       }
     }
 
@@ -413,40 +421,41 @@ void motors_function(void *arg) {
         update_status(data, 'M');
         move_up(MANUAL_STEP);
 
-        pthread_mutex_lock(&data->mutex);
-        data->position_up_down -= MANUAL_STEP;
-        pthread_mutex_unlock(&data->mutex);
+        // pthread_mutex_lock(&data->mutex);
+        // data->position_up_down -= MANUAL_STEP;
+        // pthread_mutex_unlock(&data->mutex);
 
         // Movement have been performed, change state to Waiting
         update_status(data, 'W');
       } else {
         // Limit reached, Error status and do nothing
         update_status(data, 'E');
-        sleep(SLEEP_DURATION_ERROR);
+        usleep(SLEEP_DURATION_ERROR);
       }
     }
 
     if ((button_pressed >> BUTTON_RIGHT) & 0x1) {
+      printf("Right button pressed. Pushed button: %d\n", push_sensor_value);
       if (push_sensor_value == NOT_PRESSED) {
         update_status(data, 'M');
         move_right(MANUAL_STEP);
 
-        pthread_mutex_lock(&data->mutex);
-        data->position_left_right -= MANUAL_STEP;
-        pthread_mutex_unlock(&data->mutex);
+        // pthread_mutex_lock(&data->mutex);
+        // data->position_left_right -= MANUAL_STEP;
+        // pthread_mutex_unlock(&data->mutex);
 
         // Movement have been performed, change state to Waiting
         update_status(data, 'W');
       } else {
         // Limit reached, Error status and update the position as 0
         update_status(data, 'E');
-        ev3_set_position(left_right_motor, 0);
+        // ev3_set_position(left_right_motor, 0);
 
-        pthread_mutex_lock(&data->mutex);
-        data->position_left_right = 0;
-        pthread_mutex_unlock(&data->mutex);
+        // pthread_mutex_lock(&data->mutex);
+        // data->position_left_right = 0;
+        // pthread_mutex_unlock(&data->mutex);
 
-        sleep(SLEEP_DURATION_ERROR);
+        usleep(SLEEP_DURATION_ERROR);
       }
     }
 
@@ -455,21 +464,29 @@ void motors_function(void *arg) {
         update_status(data, 'M');
         move_down(MANUAL_STEP);
 
-        pthread_mutex_lock(&data->mutex);
-        data->position_up_down += MANUAL_STEP;
-        pthread_mutex_unlock(&data->mutex);
+        // pthread_mutex_lock(&data->mutex);
+        // data->position_up_down += MANUAL_STEP;
+        // pthread_mutex_unlock(&data->mutex);
 
         update_status(data, 'W');
       } else {
         update_status(data, 'E');
-        sleep(SLEEP_DURATION_ERROR);
+        usleep(SLEEP_DURATION_ERROR);
       }
     }
 
     if ((button_pressed >> BUTTON_CENTER) & 0x1) {
+
+      printf("Position of grab_drop motor: %d\n",
+         ev3_get_position(grab_drop_motor));
+
       update_status(data, 'M');
       grab_drop(data);
       update_status(data, 'W');
+
+      printf("Position of grab_drop motor: %d\n",
+         ev3_get_position(grab_drop_motor));
+
     }
 
     if ((button_pressed >> BUTTON_BACK) & 0x1) {

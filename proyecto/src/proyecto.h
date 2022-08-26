@@ -40,7 +40,7 @@
 #define CALIBRATION_SLEEP 250000  // microseconds = 250 ms
 
 #define MAX_TIME_GRAB_DROP_MOTOR 350      // units: milliseconds
-#define MAX_DEGREES_UP_DOWN_MOTOR 60      // units: degrees
+#define MAX_DEGREES_UP_DOWN_MOTOR 160      // units: degrees
 #define MAX_DEGREES_LEFT_RIGHT_MOTOR 180  // units: degrees
 
 #define COLOR_SENSOR_THRESHOLD \
@@ -120,9 +120,9 @@ typedef struct {
   int color_sensor_value;
 
   // Motor values
-  int position_up_down;
-  int position_left_right;
-  int position_grab_drop;
+  // int position_up_down;
+  // int position_left_right;
+  // int position_grab_drop;
   pthread_mutex_t mutex;
 } robot_state;
 
